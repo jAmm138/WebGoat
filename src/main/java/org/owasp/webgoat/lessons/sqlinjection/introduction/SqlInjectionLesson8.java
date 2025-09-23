@@ -55,11 +55,12 @@ public class SqlInjectionLesson8 implements AssignmentEndpoint {
 
     try (Connection connection = dataSource.getConnection()) {
       try {
-        Statement statement =
-            connection.createStatement(
-                ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+        PreparedStatement statement = connection.prepareStatement(query,
+            ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+        statement.setString(1, name);
+        statement.setString(2, auth_tan);
         log(connection, query);
-        ResultSet results = statement.executeQuery(query);
+        ResultSet results = statement.executeQuery();
 
         if (results.getStatement() != null) {
           if (results.first()) {
@@ -138,8 +139,10 @@ public class SqlInjectionLesson8 implements AssignmentEndpoint {
         "INSERT INTO access_log (time, action) VALUES ('" + time + "', '" + action + "')";
 
     try {
-      Statement statement = connection.createStatement(TYPE_SCROLL_SENSITIVE, CONCUR_UPDATABLE);
-      statement.executeUpdate(logQuery);
+      PreparedStatement statement = connection.prepareStatement(logQuery, TYPE_SCROLL_SENSITIVE, CONCUR_UPDATABLE);
+      statement.setString(1, time);
+      statement.setString(2, action);
+      statement.executeUpdate();
     } catch (SQLException e) {
       System.err.println(e.getMessage());
     }
